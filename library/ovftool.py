@@ -78,7 +78,7 @@ def main():
                                                    module.params['vcenter'],
                                                    module.params['datacenter'],
                                                    module.params['cluster'])
-    command_tokens = [ovftool_exec],
+    command_tokens = [ovftool_exec]
     if module.params['power_on']:
         command_tokens.append('--powerOn')
     if not module.params['ssl_verify']:
