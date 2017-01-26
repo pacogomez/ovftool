@@ -78,21 +78,20 @@ def main():
                                                    module.params['vcenter'],
                                                    module.params['datacenter'],
                                                    module.params['cluster'])
-    
-    command_tokens = [ovftool_exec,
-                      '--acceptAllEulas',
-                      '--skipManifestCheck']
+    command_tokens = [ovftool_exec],
     if module.params['power_on']:
         command_tokens.append('--powerOn')
     if not module.params['ssl_verify']:
         command_tokens.append('--noSSLVerify')
     command_tokens.extend([
-                      '--allowExtraConfig',
-                      '--diskMode={}'.format(module.params['disk_mode']),
-                      '--datastore={}'.format(module.params['datastore']),
-                      # TODO: specify the network to map
-                      '--network={}'.format(module.params['portgroup']),
-                      '--name={}'.format(module.params['vm_name']),])
+                        '--acceptAllEulas',
+                        '--skipManifestCheck',
+                        '--allowExtraConfig',
+                        '--diskMode={}'.format(module.params['disk_mode']),
+                        '--datastore={}'.format(module.params['datastore']),
+                        # TODO: specify the network to map
+                        '--network={}'.format(module.params['portgroup']),
+                        '--name={}'.format(module.params['vm_name']),])
     if module.params['props']:
         for key in module.params['props'].keys():
             command_tokens.append('--prop:{}={}'.format(key, module.params['props'][key]))
@@ -102,32 +101,9 @@ def main():
 
     ova_tool_result = module.run_command(command_tokens)
     
-    # module.exit_json(changed=False, command=command_tokens)
-
-    # ova_tool_result = module.run_command([ovftool_exec,
-    #                                       '--acceptAllEulas',
-    #                                       '--skipManifestCheck',
-    #                                       '--powerOn',
-    #                                       '--noSSLVerify',
-    #                                       '--allowExtraConfig',
-    #                                       '--diskMode={}'.format(module.params['disk_mode']),
-    #                                       '--datastore={}'.format(module.params['datastore']),
-    #                                       # TODO: specify the network to map
-    #                                       '--network={}'.format(module.params['portgroup']),
-    #                                       '--name={}'.format(module.params['vm_name']),
-    #                                       '--prop:guestinfo.hostname={}'.format(module.params['vm_name']),
-    #                                       '--prop:guestinfo.ipaddress={}'.format('10.158.13.200'),
-    #                                       '--prop:guestinfo.netmask={}'.format('255.255.252.0'),
-    #                                       '--prop:guestinfo.gateway={}'.format('10.158.15.253'),
-    #                                       '--prop:guestinfo.password={}'.format(module.params['vm_password']),
-    #                                       ova_file,
-    #                                       vi_string])
-    #
     if ova_tool_result[0] != 0:
         module.fail_json(msg='Failed to deploy OVA, error message from ovftool is: {}'.format(ova_tool_result[1]))
-    # # if not wait_for_api(module):
-    # #     module.fail_json(msg='Failed to deploy OVA, timed out waiting for the API to become available')
-    #
+
     module.exit_json(changed=True, ova_tool_result=ova_tool_result)
 
 

@@ -1,6 +1,4 @@
 ---
-- debug:
-    msg: 'hello world'
 - ovftool:
     ovftool_path: '{{ ovftool_path }}'
     vcenter: '{{ vcenter }}'
