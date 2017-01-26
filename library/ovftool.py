@@ -39,7 +39,6 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             ovftool_path=dict(required=True, type='str'),
-            vm_name=dict(required=True, type='str'),
             vcenter=dict(required=True, type='str'),
             vcenter_user=dict(required=True, type='str'),
             vcenter_password=dict(required=True, type='str', no_log=True),
@@ -47,8 +46,12 @@ def main():
             cluster=dict(required=True, type='str'),
             datastore=dict(required=True, type='str'),
             portgroup=dict(required=True, type='str'),
+            disk_mode=dict(required=False, type='str', default='thin'),
             path_to_ova=dict(required=True, type='str'),
             ova_file=dict(required=True, type='str'),
+            vm_name=dict(required=True, type='str'),
+            vm_hostname=dict(required=False, type='str'),
+            vm_password=dict(required=False, type='str', no_log=True),
         ),
         supports_check_mode=True,
     )
@@ -68,8 +71,10 @@ def main():
     ovftool_exec = '{}/ovftool'.format(module.params['ovftool_path'])
     ova_file = '{}/{}'.format(module.params['path_to_ova'], module.params['ova_file'])
     vi_string = 'vi://{}:{}@{}/{}/host/{}/'.format(module.params['vcenter_user'],
-                                                   module.params['vcenter_password'], module.params['vcenter'],
-                                                   module.params['datacenter'], module.params['cluster'])
+                                                   module.params['vcenter_password'],
+                                                   module.params['vcenter'],
+                                                   module.params['datacenter'],
+                                                   module.params['cluster'])
 
     ova_tool_result = module.run_command([ovftool_exec,
                                           '--acceptAllEulas',
@@ -77,20 +82,16 @@ def main():
                                           '--powerOn',
                                           '--noSSLVerify',
                                           '--allowExtraConfig',
-                                          # '--diskMode={}'.format(module.params['disk_mode']),
+                                          '--diskMode={}'.format(module.params['disk_mode']),
                                           '--datastore={}'.format(module.params['datastore']),
-                                          # TODO: specify network to map
+                                          # TODO: specify the network to map
                                           '--network={}'.format(module.params['portgroup']),
                                           '--name={}'.format(module.params['vm_name']),
-                                          # '--prop:vsm_hostname={}'.format(module.params['hostname']),
-                                          # '--prop:vsm_dns1_0={}'.format(module.params['dns_server']),
-                                          # '--prop:vsm_domain_0={}'.format(module.params['dns_domain']),
-                                          # '--prop:vsm_ntp_0={}'.format(module.params['ntp_server']),
-                                          # '--prop:vsm_gateway_0={}'.format(module.params['gateway']),
-                                          # '--prop:vsm_ip_0={}'.format(module.params['ip_address']),
-                                          # '--prop:vsm_netmask_0={}'.format(module.params['netmask']),
-                                          # '--prop:vsm_cli_passwd_0={}'.format(module.params['admin_password']),
-                                          # '--prop:vsm_cli_en_passwd_0={}'.format(module.params['enable_password']),
+                                          '--prop:guestinfo.hostname={}'.format(module.params['vm_name']),
+                                          '--prop:guestinfo.ipaddress={}'.format('10.158.13.200'),
+                                          '--prop:guestinfo.netmask={}'.format('255.255.252.0'),
+                                          '--prop:guestinfo.gateway={}'.format('10.158.15.253'),
+                                          '--prop:guestinfo.password={}'.format(module.params['vm_password']),
                                           ova_file, 
                                           vi_string])
 

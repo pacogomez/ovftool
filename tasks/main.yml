@@ -1,0 +1,7 @@
+---
+# tasks file for ansible-role-ovfdeploy
+- debug:
+    msg: 'hello world'
+- ovftool:
+    ovftool_path: '/Applications/VMware OVF Tool'
+
