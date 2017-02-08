@@ -45,6 +45,7 @@ def main():
             datacenter=dict(required=True, type='str'),
             cluster=dict(required=True, type='str'),
             datastore=dict(required=True, type='str'),
+            ovf_network_name=dict(required=False, type='str'),
             portgroup=dict(required=True, type='str'),
             disk_mode=dict(required=False, type='str', default='thin'),
             path_to_ova=dict(required=True, type='str'),
@@ -73,11 +74,11 @@ def main():
 
     ovftool_exec = '{}/ovftool'.format(module.params['ovftool_path'])
     ova_file = '{}/{}'.format(module.params['path_to_ova'], module.params['ova_file'])
-    vi_string = 'vi://{}:{}@{}/{}/host/{}/'.format(module.params['vcenter_user'],
+    vi_string = 'vi://{}:{}@{}'.format(module.params['vcenter_user'],
                                                    module.params['vcenter_password'],
-                                                   module.params['vcenter'],
-                                                   module.params['datacenter'],
-                                                   module.params['cluster'])
+                                                   module.params['vcenter'])
+    if len(module.params['datacenter'].strip())>0:
+        vi_string += '/{}/host/{}'.format(module.params['datacenter'], module.params['cluster'])
     command_tokens = [ovftool_exec]
     if module.params['power_on']:
         command_tokens.append('--powerOn')
@@ -89,9 +90,11 @@ def main():
                         '--allowExtraConfig',
                         '--diskMode={}'.format(module.params['disk_mode']),
                         '--datastore={}'.format(module.params['datastore']),
-                        # TODO: specify the network to map
-                        '--network={}'.format(module.params['portgroup']),
                         '--name={}'.format(module.params['vm_name']),])
+    if 'ovf_network_name' in module.params.keys() and module.params['ovf_network_name'] and len(module.params['ovf_network_name'])>0:
+        command_tokens.append('--net:{}={}'.format(module.params['ovf_network_name'], module.params['portgroup']))
+    else:
+        command_tokens.append('--network={}'.format(module.params['portgroup']))
     if module.params['props']:
         for key in module.params['props'].keys():
             command_tokens.append('--prop:{}={}'.format(key, module.params['props'][key]))
