@@ -7,7 +7,7 @@
     datacenter: '{{ datacenter }}'
     cluster: '{{ cluster }}'
     datastore: '{{ datastore }}'
-    portgroup: '{{ portgroup }}'
+    portgroup: '{{ vcenter_portgroup }}'
     vm_name: '{{ vm_name }}'
     path_to_ova: '{{ path_to_ova }}'
     ova_file: '{{ ova_file }}'
