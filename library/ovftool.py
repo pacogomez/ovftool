@@ -59,6 +59,7 @@ def main():
         ),
         supports_check_mode=True,
     )
+    
     try:
         content = connect_to_api(module.params['vcenter'], module.params['vcenter_user'],
                                  module.params['vcenter_password'])
@@ -66,7 +67,7 @@ def main():
         module.fail_json(msg='exception while connecting to vCenter, login failure, check username and password')
     except requests.exceptions.ConnectionError:
         module.fail_json(msg='exception while connecting to vCenter, check hostname, FQDN or IP')
-    
+
     target_vm = find_virtual_machine(content, module.params['vm_name'])
 
     if target_vm:
@@ -80,6 +81,7 @@ def main():
     if len(module.params['datacenter'].strip())>0:
         vi_string += '/{}/host/{}'.format(module.params['datacenter'], module.params['cluster'])
     command_tokens = [ovftool_exec]
+
     if module.params['power_on']:
         command_tokens.append('--powerOn')
     if not module.params['ssl_verify']:
@@ -91,10 +93,12 @@ def main():
                         '--diskMode={}'.format(module.params['disk_mode']),
                         '--datastore={}'.format(module.params['datastore']),
                         '--name={}'.format(module.params['vm_name']),])
-    if 'ovf_network_name' in module.params.keys() and module.params['ovf_network_name'] and len(module.params['ovf_network_name'])>0:
+    
+    if 'ovf_network_name' in module.params.keys() and module.params['ovf_network_name'] is not None and len(module.params['ovf_network_name']) > 0:
         command_tokens.append('--net:{}={}'.format(module.params['ovf_network_name'], module.params['portgroup']))
     else:
         command_tokens.append('--network={}'.format(module.params['portgroup']))
+
     if module.params['props']:
         for key in module.params['props'].keys():
             command_tokens.append('--prop:{}={}'.format(key, module.params['props'][key]))
@@ -103,7 +107,7 @@ def main():
     command_tokens.extend([ova_file, vi_string])
 
     ova_tool_result = module.run_command(command_tokens)
-    
+
     if ova_tool_result[0] != 0:
         module.fail_json(msg='Failed to deploy OVA, error message from ovftool is: {}'.format(ova_tool_result[1]))
 
