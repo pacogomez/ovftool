@@ -9,7 +9,7 @@ import ssl
 import atexit
 
 def connect_to_nsx_api(ip, user, password, ssl_verify):
-    appliance_check_url = 'https://{}//api/2.0/services/vcconfig'.format(ip)
+    appliance_check_url = 'https://{}/api/2.0/services/vcconfig'.format(ip)
     response = requests.request('GET', appliance_check_url,
                                 auth=(user, password),
                                 verify=ssl_verify)
@@ -54,10 +54,10 @@ def main():
                                                  module.params['password'],
                                                  module.params['ssl_verify'])
             elif module.params['service_type'] == 'nsx':
-                content = connect_to_api(module.params['ip'],
-                                         module.params['user'],
-                                         module.params['password'],
-                                         module.params['ssl_verify'])
+                content = connect_to_nsx_api(module.params['ip'],
+                                             module.params['user'],
+                                             module.params['password'],
+                                             module.params['ssl_verify'])
             else:
                 module.fail_json(changed=False, msg='unknown service {}'.format(module.params['service_type']))
             break
