@@ -1,38 +1,88 @@
 Role Name
 =========
 
-A brief description of the role goes here.
-
-Requirements
-------------
-
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Provide a role to create VM on VMware Vcenter or standalone ESXi from a OVA file
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+	ovftool_path
+	vcenter
+	vcenter_user
+	vcenter_password
+	datacenter
+	cluster
+	datastore
+	portgroup
+	vm_name
+	path_to_ova
+	ova_file
+	power_on
+	ssl_verify
+	vm_password_key
+	vm_password
+	props
+	deployment_option
+	ovf_network_name
+	vcenter_folder
 
-Dependencies
-------------
+Role Requirements
+-----------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+This role needs the "ovftool" binary available here:
+    https://www.vmware.com/support/developer/ovf/
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+To use in your playbook:
+```
+- name: Create OVA VM
+  include_role:
+    name: ovftool
+  vars:
+    ovftool_path: '/usr/bin'
+    vcenter: 'my_esxi_host'
+    vcenter_user: 'my_esxi_username'
+    vcenter_password: 'my_esxi_password'
+    datacenter: ''
+    cluster: ''
+    datastore: 'datastore1'
+    portgroup: ''
+    vm_name: 'my_new_vm'
+    path_to_ova: '/tmp/'
+    ova_file: 'test.ova'
+    power_on: true
+    ssl_verify: false
+    ovf_network_name:
+      ova_network1: 'my_esxi_network1'
+      ova_network2: 'my_esxi_network1'
+```
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+A URL can be used instead of a local path and file by setting the `path_to_ova` to the path portion of the URL.  For instance, updating the above example to use a URL looks something like this:
 
-License
--------
+```
+- name: Create OVA VM
+  include_role:
+    name: ovftool
+  vars:
+    ...
+    ova_path: 'https://some.hostname.com/path/to/ova'
+    ova_filename: 'ova_file.ova'
+    ...
+```
 
-BSD
+Additional debugging produced by the `ovftool` can be enabled bu adding the `debug_opts:` flag like this:
+```
+- name: Create OVA VM
+  include_role:
+    name: ovftool
+  vars:
+    ...
+    debug_opts:
+      logFile: 'ovftool-1.log'
+      logLevel: 'verbose'
+    ...
+```
 
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+**NOTE:** Currently this will place the resulting log files in the directory the playbook is run when executed with `connection: local` set.
